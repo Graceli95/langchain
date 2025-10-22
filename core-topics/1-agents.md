@@ -64,11 +64,27 @@ expert_chef_model = ChatOpenAI(model="gpt-4o")
 
 @wrap_model_call
 def dynamic_model_router(request: ModelRequest, handler) -> ModelResponse:
-    """Selects a model based on how many ingredients are mentioned."""
-    user_query = request.state["messages"][-1].content
+    """Selects a model based on query complexity using multiple heuristics."""
+    user_query = request.state["messages"][-1].content.lower()
     
-    # Use the expert model if the query seems complex (e.g., more than 5 ingredients)
-    if user_query.count(',') > 4:
+    # Heuristic 1: Check for complex recipe names
+    complex_recipes = ["beef wellington", "soufflé", "soufflé", "coq au vin", 
+                       "bouillabaisse", "consommé", "croissant", "macarons"]
+    has_complex_recipe = any(recipe in user_query for recipe in complex_recipes)
+    
+    # Heuristic 2: Count ingredients (comma-separated list)
+    has_many_ingredients = user_query.count(',') > 4
+    
+    # Heuristic 3: Check for advanced cooking techniques
+    advanced_techniques = ["sous vide", "flambé", "confit", "molecular", 
+                          "emulsify", "temper", "clarify"]
+    has_advanced_technique = any(technique in user_query for technique in advanced_techniques)
+    
+    # Heuristic 4: Query length (longer queries often indicate complexity)
+    is_long_query = len(user_query.split()) > 15
+    
+    # Use expert model if ANY complexity indicator is present
+    if has_complex_recipe or has_many_ingredients or has_advanced_technique or is_long_query:
         request.model = expert_chef_model
     else:
         request.model = simple_model

@@ -31,7 +31,7 @@ The simplest way to start is with the `init_chat_model` function. LangChain's in
 Here's how to initialize a model from OpenAI. First, ensure you have the library installed and your API key is set.
 
 ```shell
-pip install -U "langchain[openai]"
+pip install -U "langchain-openai"
 ```
 
 You can initialize the model using a simple string or by creating an instance of the provider-specific class for more control.
@@ -40,9 +40,6 @@ You can initialize the model using a simple string or by creating an instance of
 import os
 from langchain.chat_models import init_chat_model
 from langchain_openai import ChatOpenAI
-
-# Set your API key as an environment variable
-os.environ["OPENAI_API_KEY"] = "sk-..."
 
 # Option 1: Initialize with a string
 model_from_string = init_chat_model("openai:gpt-4o")
