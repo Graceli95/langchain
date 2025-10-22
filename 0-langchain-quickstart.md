@@ -18,6 +18,7 @@ We'll start with a basic agent that can look up the status of a flight.
 from langchain.agents import create_agent
 
 # This is our tool—a simple function to get a flight's status.
+# @tool
 def get_flight_status(flight_number: str) -> str:
     """Gets the status for a given flight number."""
     # This is a mock response for demonstration
