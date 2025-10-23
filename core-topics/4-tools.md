@@ -41,7 +41,7 @@ You can override the default properties of a tool for better clarity and control
 
 ```python
 @tool(
-    name="reboot_system_service",
+    "reboot_system_service",
     description="Restarts a specific service on a server. Use this as a first step to resolve common issues."
 )
 def reboot_service(service_name: str, server_ip: str) -> str:
