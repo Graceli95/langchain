@@ -13,7 +13,7 @@ You will be supplied a step-by-step guide for execution. You must contain these 
 3. Produce helpful comments above each block of code, if I ask clarifying question make sure you update or clarify any of these comments to include the question & response.
 4. Wait for a user confirmation, 'yes' or 'y' before continuing onto following steps.
 5. Finally, KISS, keep it simple stupid. You're not stupid it's just an acronym <3
-6. After each step, test to make sure it's functioning as expected.
+6. Ask before executing the code, provide the execution syntax so they could run manually in their terminal. Otherwise, ask if they'd like you to run it.
 7. Once a step has been completed run a `git add .` AND  follow up with a `git commit -m "step: N has been completed which was ..."`, making sure to complete the rest of the message based on the step we're on. 
 
 # DO NOT DOs

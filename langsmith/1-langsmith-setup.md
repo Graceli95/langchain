@@ -88,19 +88,19 @@ set LANGSMITH_PROJECT=my-first-agent
 
 ---
 
-## Step 4: Understanding ReAct-Style Agents
+## Step 4: Understanding LangChain Agents
 
-A **ReAct (Reasoning + Acting)** agent is an intelligent system that:
+A **LangChain agent** is an intelligent system that:
 
-1. **Reasons**: Thinks about what action to take based on the user's query
-2. **Acts**: Decides whether to:
+1. **Analyzes**: Examines the user's query to understand what's needed
+2. **Decides**: Chooses whether to:
    - Use a tool (e.g., weather API, calculator, search)
    - Answer directly using the LLM's knowledge
-3. **Observes**: Analyzes the result and decides if more actions are needed
+3. **Executes**: Runs the chosen action and formulates a response
 
 ### Architecture:
 ```
-User Query → Agent Reasoning → Decision
+User Query → Agent Analysis → Decision
                                   ↓
                     ┌─────────────┴─────────────┐
                     ↓                           ↓
@@ -115,7 +115,7 @@ User Query → Agent Reasoning → Decision
 
 ## Step 5: Build and Test Your Agent
 
-The following Python script creates a ReAct-style agent with:
+The following Python script creates an agent with:
 - A **weather tool** for weather-related questions
 - An **LLM** for general knowledge queries
 - **LangSmith tracing** to monitor execution
@@ -124,12 +124,12 @@ The following Python script creates a ReAct-style agent with:
 
 ```python
 """
-LangSmith Integration Test - ReAct Agent
-=========================================
-This script tests LangSmith tracing with a simple ReAct-style agent.
+LangSmith Integration Test - Agent Demo
+========================================
+This script tests LangSmith tracing with a simple agent.
 
 LangChain Version: v1.0+
-Documentation Reference: https://docs.langchain.com/oss/python/langgraph
+Documentation Reference: https://docs.langchain.com/oss/python/langchain
 Last Updated: October 2024
 
 Prerequisites:
@@ -138,13 +138,9 @@ Prerequisites:
 """
 
 import os
-from typing import TypedDict, Annotated
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
-from langgraph.graph import StateGraph, END
-from langgraph.prebuilt import ToolNode
-from langgraph.graph.message import add_messages
+from langchain.agents import create_agent
 
 # Verify OpenAI API key is set
 if not os.getenv("OPENAI_API_KEY"):
@@ -189,118 +185,24 @@ def get_weather(city: str) -> str:
 
 
 # ============================================================================
-# STEP 2: Define State Schema
+# STEP 2: Create and Test the Agent
 # ============================================================================
 
-class AgentState(TypedDict):
-    """State schema for the agent workflow."""
-    messages: Annotated[list, add_messages]
-
-
-# ============================================================================
-# STEP 3: Create Agent Node Functions
-# ============================================================================
-
-def should_continue(state: AgentState) -> str:
-    """Determine if the agent should continue or end.
+if __name__ == "__main__":
+    print("\n" + "="*70)
+    print("Testing Agent with LangSmith Tracing")
+    print("="*70)
     
-    Args:
-        state: Current agent state
-        
-    Returns:
-        "tools" if agent wants to use tools, "end" otherwise
-    """
-    last_message = state["messages"][-1]
-    
-    # If the LLM makes a tool call, route to tools
-    if hasattr(last_message, "tool_calls") and last_message.tool_calls:
-        return "tools"
-    
-    # Otherwise, end the workflow
-    return "end"
-
-
-def call_model(state: AgentState) -> AgentState:
-    """Call the LLM with the current state.
-    
-    Args:
-        state: Current agent state
-        
-    Returns:
-        Updated state with LLM response
-    """
-    # Initialize the LLM with tool binding
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-    tools = [get_weather]
-    llm_with_tools = llm.bind_tools(tools)
-    
-    # Get system prompt
-    system_message = {
-        "role": "system",
-        "content": (
+    # Create the agent - THIS IS IT! Just one simple call.
+    agent = create_agent(
+        model="openai:gpt-4o-mini",
+        tools=[get_weather],
+        system_prompt=(
             "You are a helpful AI assistant. "
             "For weather-related questions, use the get_weather tool. "
             "For general questions, answer using your knowledge."
         )
-    }
-    
-    # Call the model
-    messages = [system_message] + state["messages"]
-    response = llm_with_tools.invoke(messages)
-    
-    return {"messages": [response]}
-
-
-# ============================================================================
-# STEP 4: Build the LangGraph Workflow
-# ============================================================================
-
-def create_agent():
-    """Create and compile the ReAct agent workflow.
-    
-    Returns:
-        Compiled LangGraph application
-    """
-    # Initialize the state graph
-    workflow = StateGraph(AgentState)
-    
-    # Add nodes
-    workflow.add_node("agent", call_model)
-    workflow.add_node("tools", ToolNode([get_weather]))
-    
-    # Set entry point
-    workflow.set_entry_point("agent")
-    
-    # Add conditional edges
-    workflow.add_conditional_edges(
-        "agent",
-        should_continue,
-        {
-            "tools": "tools",
-            "end": END,
-        }
     )
-    
-    # Add edge from tools back to agent
-    workflow.add_edge("tools", "agent")
-    
-    # Compile the graph
-    return workflow.compile()
-
-
-# ============================================================================
-# STEP 5: Test the Agent
-# ============================================================================
-
-def test_agent():
-    """Run test queries to verify the agent and LangSmith integration."""
-    
-    print("\n" + "="*70)
-    print("Testing ReAct Agent with LangSmith Tracing")
-    print("="*70)
-    
-    # Create the agent
-    agent = create_agent()
     
     # Test cases
     test_queries = [
@@ -340,10 +242,6 @@ def test_agent():
     print("   • LLM calls and responses")
     print("   • Token usage and latency metrics")
     print("="*70 + "\n")
-
-
-if __name__ == "__main__":
-    test_agent()
 ```
 
 ---
@@ -353,7 +251,7 @@ if __name__ == "__main__":
 Execute the script:
 
 ```bash
-python langsmith/test_agent.py
+python langsmith/langsmith_setup_demo.py
 ```
 
 ### Expected Output:
@@ -364,7 +262,7 @@ python langsmith/test_agent.py
    Tracing: true
 
 ======================================================================
-Testing ReAct Agent with LangSmith Tracing
+Testing Agent with LangSmith Tracing
 ======================================================================
 
 ──────────────────────────────────────────────────────────────────────
@@ -438,12 +336,12 @@ Once `LANGSMITH_TRACING=true` is set, **all** LangChain operations are automatic
 - Query 1 & 3: Agent **uses the tool** because they ask about weather
 - Query 2: Agent **answers directly** using LLM knowledge (no tool needed)
 
-### 3. **LangGraph vs. LCEL**
-This example uses **LangGraph** (the v1.0 standard) instead of deprecated LCEL:
-- ✅ More explicit and maintainable
-- ✅ Better for complex workflows with cycles
-- ✅ Built-in state management and persistence
-- ❌ LCEL (pipe operators like `|`) is **removed** in v1.0
+### 3. **Simplified Agent Creation**
+This example uses **`create_agent`** (the v1.0 standard):
+- ✅ Simple one-line agent creation
+- ✅ Handles all workflow complexity automatically
+- ✅ Built-in state management and tool calling
+- ✅ Can be extended with LangGraph for advanced customization if needed
 
 ---
 
@@ -494,7 +392,7 @@ Now that LangSmith is working, you can:
 - ✅ Created LangSmith API key
 - ✅ Installed dependencies (`langchain`, `langchain-openai`, `langsmith`, `langgraph`)
 - ✅ Configured environment variables
-- ✅ Built a ReAct-style agent using LangGraph
+- ✅ Built an agent using LangChain's `create_agent` helper
 - ✅ Tested with multiple query types
 - ✅ Verified traces appear in LangSmith dashboard
 - ✅ Understood the difference between tool calls and direct LLM responses
