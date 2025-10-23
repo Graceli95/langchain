@@ -112,9 +112,17 @@ You can turn any Python function into a tool using the `@tool` decorator. Just p
 from langchain.tools import tool
 from langchain.agents import create_agent
 
-@tool
+@tool(name="search_recipe")
 def find_recipe(dish_name: str) -> str:
-    """Searches for a recipe for a specific dish."""
+    """
+    Searches for a recipe for a specific dish.
+
+    Params:
+        dish_name (str): The name of the dish to search for.
+
+    Returns:
+        str: A message indicating that a recipe has been found for the specified dish.
+    """
     # In a real app, this would query a database or API
     return f"Found a classic recipe for {dish_name}."
 
