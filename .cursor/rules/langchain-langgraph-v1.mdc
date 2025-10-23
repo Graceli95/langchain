@@ -1,0 +1,225 @@
+---
+alwaysApply: true
+---
+# LangChain & LangGraph v1.0 Development Guidelines
+
+This rule ensures all LangChain and LangGraph code is built using the latest v1.0 documentation and best practices.
+
+## Pre-Development Documentation Check
+
+**BEFORE** writing any code that involves LangChain or LangGraph:
+
+1. **Search for Latest Documentation:**
+   - Use `@Web` search to query the latest documentation for the specific feature/component you're implementing
+   - Primary documentation source: https://docs.langchain.com/oss/python/langchain
+   - Search query format: "LangChain v1.0 [specific feature/component] site:docs.langchain.com"
+   - Examples:
+     - "LangGraph v1.0 StateGraph workflow site:docs.langchain.com"
+     - "LangGraph v1.0 agent workflow site:docs.langchain.com"
+     - "LangChain v1.0 vector stores site:docs.langchain.com"
+
+2. **Verify Breaking Changes:**
+   - Check for v0.x to v1.0 migration notes
+   - Identify deprecated APIs or patterns
+   - Look for new recommended approaches
+
+3. **Document Your Research:**
+   - Add a comment block at the top of new files indicating:
+     - Date documentation was checked
+     - Specific LangChain/LangGraph version being targeted
+     - Key documentation references used
+
+## LangChain v1.0 Best Practices
+
+### Imports and Versions
+```python
+# Always use explicit version checking when critical
+from langchain import __version__
+# Target: v1.0+
+# Documentation checked: [DATE]
+# Reference: [URL]
+```
+
+### Core Architecture Changes in v1.0
+**IMPORTANT:** LangChain Expression Language (LCEL) has been **deprecated and removed** in v1.0.
+
+### LangGraph - The New Standard
+- **LangGraph replaces LCEL** as the primary framework for building applications
+- Use `StateGraph` for all workflow and chain construction
+- Benefits over LCEL:
+  - Built-in persistence and state management
+  - Support for cycles and complex control flow
+  - Better debugging and observability
+  - More explicit and maintainable code
+
+### LangGraph State Management
+- Use **typed state dictionaries** with proper schema definitions
+- Define clear state transformations in nodes
+- Implement proper edge conditions for workflow routing
+- Use `StateGraph` for complex multi-agent workflows
+- Example structure:
+  ```python
+  from langgraph.graph import StateGraph
+  from typing import TypedDict
+  
+  class State(TypedDict):
+      input: str
+      output: str
+  
+  workflow = StateGraph(State)
+  workflow.add_node("process", process_function)
+  workflow.set_entry_point("process")
+  app = workflow.compile()
+  ```
+
+### Standardized Model Interface
+- LangChain v1.0 introduces a unified model interface
+- Consistent API across different LLM providers
+- Use `.invoke()`, `.batch()`, `.stream()` methods consistently
+- Leverage async methods when available (`.ainvoke()`, `.abatch()`)
+
+### Vector Stores and Retrievers
+- Use the latest vectorstore implementations
+- Implement proper metadata filtering
+- Use `.as_retriever()` method for integration with workflows
+- Integrate retrievers as nodes in LangGraph workflows
+
+### Memory and Chat History
+- Implement memory as part of LangGraph state
+- Use persistent state management for conversations
+- Avoid legacy memory abstractions like `ConversationBufferMemory`
+
+### Agents and Tools
+- Use **LangGraph** for all agent workflows (LCEL agents are deprecated)
+- Define tools using the `@tool` decorator
+- Implement proper error handling and fallbacks
+- Use structured output parsing with Pydantic models
+- Agents are now nodes in LangGraph workflows
+
+## Code Review Checklist
+
+Before committing LangChain/LangGraph code, verify:
+
+- [ ] Latest v1.0 documentation was consulted (web search performed)
+- [ ] No deprecated v0.x patterns are used (especially LCEL)
+- [ ] LangGraph `StateGraph` is used for workflows and chains
+- [ ] No LCEL pipe operators (`|`) or legacy chain patterns
+- [ ] Proper async/await patterns implemented if needed
+- [ ] Error handling includes LangChain-specific exceptions
+- [ ] Type hints are used throughout
+- [ ] Pydantic models used for structured I/O
+- [ ] Documentation comments reference specific v1.0 docs
+- [ ] Environment variables properly configured (API keys, etc.)
+- [ ] Rate limiting and cost management considered
+
+## Common Migration Issues (v0.x → v1.0)
+
+Watch out for these breaking changes:
+
+1. **LCEL Removal (CRITICAL):**
+   - ❌ Deprecated: All LCEL patterns including pipe operator (`|`)
+   - ❌ Deprecated: `prompt | llm | output_parser`
+   - ✅ New: Use LangGraph `StateGraph` for all workflows
+   - ✅ Example:
+     ```python
+     from langgraph.graph import StateGraph
+     
+     workflow = StateGraph(State)
+     workflow.add_node("llm_call", llm_function)
+     workflow.add_node("parse", parse_function)
+     workflow.add_edge("llm_call", "parse")
+     app = workflow.compile()
+     ```
+
+2. **Chain Construction:**
+   - ❌ Old: `LLMChain(llm=llm, prompt=prompt)`
+   - ❌ Old: Any LCEL chain patterns
+   - ✅ New: LangGraph workflows with nodes and edges
+
+3. **Agent Creation:**
+   - ❌ Old: `initialize_agent(...)`
+   - ❌ Old: `create_react_agent(...)` with LCEL
+   - ✅ New: LangGraph-based agent workflows
+
+4. **Memory:**
+   - ❌ Old: `ConversationBufferMemory`
+   - ❌ Old: `RunnableWithMessageHistory`
+   - ✅ New: State management within LangGraph workflows
+
+5. **Output Parsing:**
+   - ❌ Old: Custom string parsing
+   - ✅ New: Structured output with `.with_structured_output()` and Pydantic
+   - ✅ New: Parse nodes in LangGraph workflows
+
+6. **Callbacks:**
+   - ❌ Old: Direct callback handlers
+   - ✅ New: LangGraph persistence and checkpoint system
+
+## Testing Requirements
+
+All LangChain/LangGraph code must include:
+
+- Unit tests with mocked LLM responses
+- Integration tests with actual API calls (in separate test suite)
+- Error handling tests (rate limits, API failures, malformed responses)
+- Token usage and cost estimation validation
+
+## Documentation Requirements
+
+Each LangChain/LangGraph module must have:
+
+```python
+"""
+Module: [module_name]
+Purpose: [brief description]
+
+LangChain Version: v1.0+
+Documentation Reference: [URL]
+Last Updated: [DATE]
+
+Key Components:
+- [Component 1]: [description]
+- [Component 2]: [description]
+
+Dependencies:
+- langchain>=1.0.0
+- langchain-community>=1.0.0
+- [other specific packages]
+"""
+```
+
+## AI Assistant Instructions
+
+When the user asks you to implement LangChain or LangGraph functionality:
+
+1. **ALWAYS** perform a web search first using the format:
+   - `@Web search: "LangChain v1.0 [feature] site:docs.langchain.com"`
+   
+2. **Read and synthesize** the documentation findings before writing code
+
+3. **Explain** what you learned from the latest docs before implementing
+
+4. **Reference** specific documentation URLs in your code comments
+
+5. **Flag** any areas where documentation is unclear or conflicting
+
+6. **Suggest** modern v1.0 patterns over legacy approaches
+
+7. **Test** code with realistic examples
+
+## Resources
+
+All v1.0 documentation is hosted at docs.langchain.com:
+
+- **Primary Docs**: https://docs.langchain.com/
+- **LangChain (Python)**: https://docs.langchain.com/oss/python/langchain
+- **LangGraph (Python)**: https://docs.langchain.com/oss/python/langgraph
+- **Migration to v1.0**: https://docs.langchain.com/oss/python/migrate/langgraph-v1
+- **LangSmith Platform**: https://docs.langchain.com/langsmith
+- **MCP Server** (Programmatic Access): https://docs.langchain.com/mcp
+- **GitHub**: https://github.com/langchain-ai/langchain
+
+## Version Tracking
+
+This rule was created for LangChain v1.0+ (October 2024 onwards)
+Last updated: October 22, 2025
