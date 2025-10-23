@@ -201,7 +201,8 @@ if __name__ == "__main__":
             "You are a helpful AI assistant. "
             "For weather-related questions, use the get_weather tool. "
             "For general questions, answer using your knowledge."
-        )
+        ),
+        name="weather_agent"
     )
     
     # Test cases
