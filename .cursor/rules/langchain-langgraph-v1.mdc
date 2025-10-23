@@ -19,7 +19,7 @@ This rule ensures all LangChain and LangGraph code is built using the **latest v
 ### Required Steps:
 
 1. **Search for Latest Documentation (MANDATORY):**
-   - **ALWAYS** use `@Web` to search for current documentation
+   - **ALWAYS** use `@Web` and `@https://docs.langchain.com/oss/python/langchain` to search for current documentation
    - Primary source: https://docs.langchain.com/oss/python/langchain
    - Search query format: `"LangChain v1.0 [specific feature] site:docs.langchain.com"`
    - Examples:
@@ -65,10 +65,10 @@ from langchain import __version__
 **KEY PRINCIPLE:** Start simple, only go complex when needed. The user deserves clean, maintainable code.
 
 LangChain v1.0 provides **high-level helper functions** for common tasks:
-- ✅ **ALWAYS PREFER**: `create_agent()` for standard agents (from `langchain.agents`)
-- ✅ **ALWAYS PREFER**: Built-in functions like `init_chat_model()` 
-- ✅ **ALWAYS PREFER**: Simple, direct APIs over manual graph construction
-- ✅ **KEEP IT SIMPLE**: Avoid unnecessary wrapper functions or abstractions
+- **ALWAYS PREFER**: `create_agent()` for standard agents (from `langchain.agents`)
+- **ALWAYS PREFER**: Built-in functions like `init_chat_model()` 
+- **ALWAYS PREFER**: Simple, direct APIs over manual graph construction
+- **KEEP IT SIMPLE**: Avoid unnecessary wrapper functions or abstractions
 
 **Only use manual LangGraph StateGraph when you need:**
 - Custom nodes or workflow logic beyond standard agent patterns
@@ -78,9 +78,9 @@ LangChain v1.0 provides **high-level helper functions** for common tasks:
 - Custom state transformations
 
 **DO NOT use manual LangGraph for:**
-- ❌ Simple single agents (use `create_agent()` instead)
-- ❌ Basic tool-calling workflows (use `create_agent()` instead)
-- ❌ Straightforward Q&A bots (use `create_agent()` instead)
+- **WRONG**: Simple single agents (use `create_agent()` instead)
+- **WRONG**: Basic tool-calling workflows (use `create_agent()` instead)
+- **WRONG**: Straightforward Q&A bots (use `create_agent()` instead)
 
 ### Simple Agent Creation (ALWAYS START HERE)
 
@@ -107,10 +107,10 @@ result = agent.invoke({"messages": [{"role": "user", "content": "Hello"}]})
 ```
 
 **Key Benefits:**
-- ✅ Simple and readable
-- ✅ Built on LangGraph under the hood (gets all the benefits)
-- ✅ Handles tool calling, state management, and message history automatically
-- ✅ Production-ready out of the box
+- Simple and readable
+- Built on LangGraph under the hood (gets all the benefits)
+- Handles tool calling, state management, and message history automatically
+- Production-ready out of the box
 
 ### Advanced: Manual LangGraph (Only When Necessary)
 When you need custom workflow control:
@@ -173,23 +173,23 @@ Before committing LangChain/LangGraph code, verify:
 Watch out for these breaking changes:
 
 1. **LCEL Removal (CRITICAL):**
-   - ❌ Deprecated: All LCEL patterns including pipe operator (`|`)
-   - ❌ Deprecated: `prompt | llm | output_parser`
-   - ✅ New: Use helper functions OR LangGraph for custom workflows
+   - **DEPRECATED**: All LCEL patterns including pipe operator (`|`)
+   - **DEPRECATED**: `prompt | llm | output_parser`
+   - **CORRECT**: Use helper functions OR LangGraph for custom workflows
 
 2. **Chain Construction:**
-   - ❌ Old: `LLMChain(llm=llm, prompt=prompt)`
-   - ❌ Old: Any LCEL chain patterns
-   - ✅ New: For simple cases, use direct model invocation
-   - ✅ New: For complex workflows, use LangGraph StateGraph
+   - **DEPRECATED**: `LLMChain(llm=llm, prompt=prompt)`
+   - **DEPRECATED**: Any LCEL chain patterns
+   - **CORRECT**: For simple cases, use direct model invocation
+   - **CORRECT**: For complex workflows, use LangGraph StateGraph
 
 3. **Agent Creation:**
-   - ❌ **DEPRECATED**: `initialize_agent(...)` (removed in v1.0)
-   - ❌ **DEPRECATED**: `create_react_agent(...)` (removed in v1.0)
-   - ❌ **DEPRECATED**: Any reference to "ReAct" agents (terminology no longer used)
-   - ❌ **WRONG**: Manual LangGraph StateGraph for simple agents
-   - ✅ **CORRECT**: `create_agent()` from `langchain.agents` (current v1.0 standard)
-   - ✅ **ADVANCED**: Manual LangGraph StateGraph ONLY for complex custom workflows
+   - **DEPRECATED**: `initialize_agent(...)` (removed in v1.0)
+   - **DEPRECATED**: `create_react_agent(...)` (removed in v1.0)
+   - **DEPRECATED**: Any reference to "ReAct" agents (terminology no longer used)
+   - **WRONG**: Manual LangGraph StateGraph for simple agents
+   - **CORRECT**: `create_agent()` from `langchain.agents` (current v1.0 standard)
+   - **ADVANCED**: Manual LangGraph StateGraph ONLY for complex custom workflows
    
    **Example (simple agent - use this 90% of the time):**
    ```python
@@ -203,18 +203,18 @@ Watch out for these breaking changes:
    ```
 
 4. **Memory:**
-   - ❌ Old: `ConversationBufferMemory`
-   - ❌ Old: `RunnableWithMessageHistory`
-   - ✅ New: State management within LangGraph workflows
+   - **DEPRECATED**: `ConversationBufferMemory`
+   - **DEPRECATED**: `RunnableWithMessageHistory`
+   - **CORRECT**: State management within LangGraph workflows
 
 5. **Output Parsing:**
-   - ❌ Old: Custom string parsing
-   - ✅ New: Structured output with `.with_structured_output()` and Pydantic
-   - ✅ New: Parse nodes in LangGraph workflows
+   - **DEPRECATED**: Custom string parsing
+   - **CORRECT**: Structured output with `.with_structured_output()` and Pydantic
+   - **CORRECT**: Parse nodes in LangGraph workflows
 
 6. **Callbacks:**
-   - ❌ Old: Direct callback handlers
-   - ✅ New: LangGraph persistence and checkpoint system
+   - **DEPRECATED**: Direct callback handlers
+   - **CORRECT**: LangGraph persistence and checkpoint system
 
 ## Testing Requirements
 
@@ -255,47 +255,47 @@ Dependencies:
 
 ### Mandatory Workflow:
 
-1. **🔍 SEARCH FIRST (REQUIRED):**
-   - **ALWAYS** use `@Web` to search for current documentation
+1. **SEARCH FIRST (REQUIRED):**
+   - **ALWAYS** use `@Web` and `@https://docs.langchain.com/oss/python/langchain` to search for current documentation
    - Query: `"LangChain v1.0 [feature] site:docs.langchain.com"`
    - **DO NOT** skip this step, even if you think you know the API
    - **VERIFY** your assumptions against live documentation
 
-2. **🎯 START SIMPLE:**
+2. **START SIMPLE:**
    - Check if there's a built-in helper function first
    - For agents: Use `create_agent()` - don't manually build LangGraph
    - For models: Use `init_chat_model()` - don't manually instantiate
    - For standard patterns: Use helper functions - don't reinvent wheels
    
-3. **⚠️ CHALLENGE YOURSELF:**
+3. **CHALLENGE YOURSELF:**
    - If your solution feels complex, search for a simpler approach
    - If you're writing >20 lines for a basic agent, you're probably overcomplicating it
    - If you're tempted to use LangGraph StateGraph for a simple agent, **STOP** and use `create_agent()`
 
-4. **🚫 ONLY GO COMPLEX WHEN:**
+4. **ONLY GO COMPLEX WHEN:**
    - User explicitly requests custom workflow logic
    - Building multi-agent systems with complex coordination
    - Need features genuinely not available in helper functions
    - Implementing advanced patterns (human-in-the-loop, custom routing)
 
-5. **📚 EXPLAIN YOUR RESEARCH:**
+5. **EXPLAIN YOUR RESEARCH:**
    - Share what you learned from the documentation
    - Cite specific documentation URLs
    - Explain why you chose this approach over alternatives
 
-6. **🚩 FLAG CONCERNS:**
+6. **FLAG CONCERNS:**
    - If documentation is unclear or conflicting, mention it
    - If you're uncertain, admit it and suggest verification
    - If breaking changes might affect existing code, warn the user
 
-7. **💡 KISS Principle (Keep It Simple, Stupid):**
+7. **KISS PRINCIPLE (Keep It Simple, Stupid):**
    - Prefer readability over cleverness
    - Prefer built-in functions over manual construction
    - Avoid unnecessary wrapper functions or abstractions
    - Only add complexity when there's a clear, documented benefit
    - Linear, top-to-bottom code flow is better than nested functions
 
-8. **✅ QUALITY ASSURANCE:**
+8. **QUALITY ASSURANCE:**
    - Include helpful comments explaining what each section does
    - Add type hints for clarity
    - Handle errors gracefully
@@ -316,23 +316,23 @@ All v1.0 documentation is hosted at docs.langchain.com:
 ## Trust & Quality Commitment
 
 **The user can trust that you will:**
-- ✅ Always search for current documentation before coding
-- ✅ Use the simplest approach that solves the problem
-- ✅ Deliver v1.0-compliant code, not deprecated patterns
-- ✅ Explain your approach and cite documentation sources
-- ✅ Flag any uncertainties or potential issues
-- ✅ Write clean, maintainable, well-commented code
-- ✅ Follow KISS principles - no unnecessary complexity
+- Always search for current documentation before coding
+- Use the simplest approach that solves the problem
+- Deliver v1.0-compliant code, not deprecated patterns
+- Explain your approach and cite documentation sources
+- Flag any uncertainties or potential issues
+- Write clean, maintainable, well-commented code
+- Follow KISS principles - no unnecessary complexity
 
 **You will NOT:**
-- ❌ Use deprecated APIs (LCEL, create_react_agent, etc.)
-- ❌ Overcomplicate simple problems
-- ❌ Guess at APIs - always verify with web search
-- ❌ Write manual LangGraph for basic agents
-- ❌ Create unnecessary wrapper functions or abstractions
+- Use deprecated APIs (LCEL, create_react_agent, etc.)
+- Overcomplicate simple problems
+- Guess at APIs - always verify with web search
+- Write manual LangGraph for basic agents
+- Create unnecessary wrapper functions or abstractions
 
 ## Version Tracking
 
 This rule was created for LangChain v1.0+ (October 2024 onwards)  
 Last updated: October 23, 2025  
-**Rule validated against live documentation: YES** ✅
+**Rule validated against live documentation: YES**
