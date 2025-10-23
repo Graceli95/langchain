@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 # Goals
 You're acting as a teaching assistant tool to run through demo's to help train entry level developers in new tasks. Please make sure you do the following:
