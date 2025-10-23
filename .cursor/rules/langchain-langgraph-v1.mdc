@@ -43,34 +43,54 @@ from langchain import __version__
 ### Core Architecture Changes in v1.0
 **IMPORTANT:** LangChain Expression Language (LCEL) has been **deprecated and removed** in v1.0.
 
-### LangGraph - The New Standard
-- **LangGraph replaces LCEL** as the primary framework for building applications
-- Use `StateGraph` for all workflow and chain construction
-- Benefits over LCEL:
-  - Built-in persistence and state management
-  - Support for cycles and complex control flow
-  - Better debugging and observability
-  - More explicit and maintainable code
+### Simplicity First: Use Built-in Helper Functions
+**KEY PRINCIPLE:** Start simple, only go complex when needed.
 
-### LangGraph State Management
-- Use **typed state dictionaries** with proper schema definitions
-- Define clear state transformations in nodes
-- Implement proper edge conditions for workflow routing
-- Use `StateGraph` for complex multi-agent workflows
-- Example structure:
-  ```python
-  from langgraph.graph import StateGraph
-  from typing import TypedDict
-  
-  class State(TypedDict):
-      input: str
-      output: str
-  
-  workflow = StateGraph(State)
-  workflow.add_node("process", process_function)
-  workflow.set_entry_point("process")
-  app = workflow.compile()
-  ```
+LangChain v1.0 provides **high-level helper functions** for common tasks:
+- ✅ **PREFER**: `create_agent()` for standard agents
+- ✅ **PREFER**: Built-in functions like `init_chat_model()` 
+- ✅ **PREFER**: Simple, direct APIs over manual graph construction
+
+**Only use manual LangGraph StateGraph when you need:**
+- Custom nodes or workflow logic
+- Multi-agent coordination
+- Human-in-the-loop patterns
+- Complex routing or cycles
+- Custom state transformations
+
+### Simple Agent Creation (RECOMMENDED)
+```python
+from langchain.agents import create_agent
+from langchain_core.tools import tool
+
+@tool
+def my_tool(query: str) -> str:
+    """My tool description."""
+    return "result"
+
+# That's it! 4 lines for a working agent.
+agent = create_agent(
+    model="openai:gpt-4o-mini",
+    tools=[my_tool],
+    system_prompt="You are a helpful assistant."
+)
+```
+
+### Advanced: Manual LangGraph (Only When Necessary)
+When you need custom workflow control:
+```python
+from langgraph.graph import StateGraph
+from typing import TypedDict
+
+class State(TypedDict):
+    input: str
+    output: str
+
+workflow = StateGraph(State)
+workflow.add_node("process", process_function)
+workflow.set_entry_point("process")
+app = workflow.compile()
+```
 
 ### Standardized Model Interface
 - LangChain v1.0 introduces a unified model interface
@@ -90,11 +110,11 @@ from langchain import __version__
 - Avoid legacy memory abstractions like `ConversationBufferMemory`
 
 ### Agents and Tools
-- Use **LangGraph** for all agent workflows (LCEL agents are deprecated)
+- **PREFER**: Use `create_agent()` from `langchain.agents` for standard agents
 - Define tools using the `@tool` decorator
 - Implement proper error handling and fallbacks
 - Use structured output parsing with Pydantic models
-- Agents are now nodes in LangGraph workflows
+- Only use manual LangGraph StateGraph for complex custom workflows
 
 ## Code Review Checklist
 
@@ -102,7 +122,7 @@ Before committing LangChain/LangGraph code, verify:
 
 - [ ] Latest v1.0 documentation was consulted (web search performed)
 - [ ] No deprecated v0.x patterns are used (especially LCEL)
-- [ ] LangGraph `StateGraph` is used for workflows and chains
+- [ ] **Used simplest approach first** (helper functions before manual graphs)
 - [ ] No LCEL pipe operators (`|`) or legacy chain patterns
 - [ ] Proper async/await patterns implemented if needed
 - [ ] Error handling includes LangChain-specific exceptions
@@ -119,27 +139,29 @@ Watch out for these breaking changes:
 1. **LCEL Removal (CRITICAL):**
    - ❌ Deprecated: All LCEL patterns including pipe operator (`|`)
    - ❌ Deprecated: `prompt | llm | output_parser`
-   - ✅ New: Use LangGraph `StateGraph` for all workflows
-   - ✅ Example:
-     ```python
-     from langgraph.graph import StateGraph
-     
-     workflow = StateGraph(State)
-     workflow.add_node("llm_call", llm_function)
-     workflow.add_node("parse", parse_function)
-     workflow.add_edge("llm_call", "parse")
-     app = workflow.compile()
-     ```
+   - ✅ New: Use helper functions OR LangGraph for custom workflows
 
 2. **Chain Construction:**
    - ❌ Old: `LLMChain(llm=llm, prompt=prompt)`
    - ❌ Old: Any LCEL chain patterns
-   - ✅ New: LangGraph workflows with nodes and edges
+   - ✅ New: For simple cases, use direct model invocation
+   - ✅ New: For complex workflows, use LangGraph StateGraph
 
 3. **Agent Creation:**
    - ❌ Old: `initialize_agent(...)`
-   - ❌ Old: `create_react_agent(...)` with LCEL
-   - ✅ New: LangGraph-based agent workflows
+   - ❌ Old: v0.x `create_react_agent(...)` with LCEL
+   - ✅ **PREFERRED**: `create_agent()` from `langchain.agents`
+   - ✅ Advanced: Manual LangGraph StateGraph for custom workflows
+   - Example (simple):
+     ```python
+     from langchain.agents import create_agent
+     
+     agent = create_agent(
+         model="openai:gpt-4o-mini",
+         tools=[my_tool],
+         system_prompt="You are helpful."
+     )
+     ```
 
 4. **Memory:**
    - ❌ Old: `ConversationBufferMemory`
@@ -192,18 +214,29 @@ Dependencies:
 
 When the user asks you to implement LangChain or LangGraph functionality:
 
-1. **ALWAYS** perform a web search first using the format:
-   - `@Web search: "LangChain v1.0 [feature] site:docs.langchain.com"`
-   
-2. **Read and synthesize** the documentation findings before writing code
+1. **START SIMPLE**: Check if there's a built-in helper function first
+   - For agents: Try `create_agent()` before manual StateGraph
+   - For models: Try `init_chat_model()` before custom setup
+   - For standard patterns: Use helper functions
 
-3. **Explain** what you learned from the latest docs before implementing
+2. **ONLY GO COMPLEX when needed**:
+   - User explicitly requests custom workflow
+   - Need features not available in helper functions
+   - Building multi-agent systems or advanced patterns
 
-4. **Reference** specific documentation URLs in your code comments
+3. **Documentation Check**:
+   - Perform web search: `@Web "LangChain v1.0 [feature] site:docs.langchain.com"`
+   - Read and synthesize findings before writing code
+   - Reference specific documentation URLs in comments
+
+4. **Explain** what you learned from the docs before implementing
 
 5. **Flag** any areas where documentation is unclear or conflicting
 
-6. **Suggest** modern v1.0 patterns over legacy approaches
+6. **KISS Principle**: Keep It Simple, Stupid
+   - Prefer readability over cleverness
+   - Prefer built-in functions over manual construction
+   - Only add complexity when there's a clear benefit
 
 7. **Test** code with realistic examples
 
