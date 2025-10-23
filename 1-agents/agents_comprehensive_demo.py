@@ -96,7 +96,7 @@ def demo_static_model_simple():
     
     print("\nAgent Response:")
     print(result)
-    print("\n✓ This approach is simple and works great for most cases!")
+    print("\n[+] This approach is simple and works great for most cases!")
 
 
 def demo_static_model_customized():
@@ -133,7 +133,7 @@ def demo_static_model_customized():
     
     print("\nAgent Response:")
     print(result)
-    print("\n✓ Custom settings give you fine-grained control over model behavior!")
+    print("\n[+] Custom settings give you fine-grained control over model behavior!")
 
 
 # =============================================================================
@@ -169,7 +169,7 @@ def demo_static_system_prompt():
     
     print("\nAgent Response:")
     print(result)
-    print("\n✓ System prompts shape how your agent communicates and behaves!")
+    print("\n[+] System prompts shape how your agent communicates and behaves!")
 
 
 # =============================================================================
@@ -216,7 +216,7 @@ def demo_complete_agent():
     
     print("\nAgent Response:")
     print(result)
-    print("\n✓ This is a complete, production-ready agent pattern!")
+    print("\n[+] This is a complete, production-ready agent pattern!")
 
 
 # =============================================================================
@@ -225,19 +225,19 @@ def demo_complete_agent():
 
 if __name__ == "__main__":
     print("""
-╔════════════════════════════════════════════════════════════════════════════╗
-║                                                                            ║
-║                   LANGCHAIN AGENTS - COMPREHENSIVE DEMO                    ║
-║                                                                            ║
-║  This demo walks through the three core components of LangChain agents:    ║
-║  1. Models (the "brain" that reasons through tasks)                        ║
-║  2. Tools (functions the agent can call to take actions)                   ║
-║  3. System Prompts (instructions that guide agent behavior)                ║
-║                                                                            ║
-╚════════════════════════════════════════════════════════════════════════════╝
+================================================================================
+                                                                            
+                   LANGCHAIN AGENTS - COMPREHENSIVE DEMO                    
+                                                                            
+  This demo walks through the three core components of LangChain agents:    
+  1. Models (the "brain" that reasons through tasks)                        
+  2. Tools (functions the agent can call to take actions)                   
+  3. System Prompts (instructions that guide agent behavior)                
+                                                                            
+================================================================================
     """)
     
-    print("\n📚 IMPORTANT NOTE:")
+    print("\n[!] IMPORTANT NOTE:")
     print("This demo requires:")
     print("  - langchain")
     print("  - langchain-openai")
@@ -253,10 +253,8 @@ if __name__ == "__main__":
     demo_complete_agent()
     
     print("\n" + "="*80)
-    print("📝 TO RUN THESE DEMOS:")
+    print("[*] DEMO COMPLETED!")
     print("="*80)
-    print("1. Ensure your OpenAI API key is set as an environment variable")
-    print("2. Uncomment the demo functions at the bottom of this file")
-    print("3. Run: python agents_comprehensive_demo.py")
-    print("\n✓ All demos are ready to use!")
+    print("\nAll four demos have been executed successfully!")
+    print("\n[+] All demos are ready to use!")
 
